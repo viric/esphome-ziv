@@ -196,6 +196,8 @@ void ZivComponent::communicate()
         int maxsend = buffer->size - mdatapos_;
         if (maxsend > 0)
         {
+            /* The loop() shouldn't last more than 20ms they say, and at 9600bauds and no
+             * UART tx buffer this means we have to send small pieces */
             if (maxsend > 10)
                 maxsend = 10;
             ESP_LOGV(TAG, "communicate: write_array index %d pos %d size %d",
