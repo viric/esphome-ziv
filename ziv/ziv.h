@@ -189,12 +189,19 @@ public:
     int value_;
 };
 
+/* Ziv 5CTM electricity meter IR communication */
 class ZivComponent : public PollingComponent, public FrameReceiver {
  public:
   ZivComponent();
 
-  void set_import_sensor(sensor::Sensor *import_sensor) { this->import_sensor_ = import_sensor; }
-  void set_export_sensor(sensor::Sensor *export_sensor) { this->export_sensor_ = export_sensor; }
+  void set_import_energy_sensor(sensor::Sensor *sensor)
+    { this->import_energy_sensor_ = sensor; }
+  void set_export_energy_sensor(sensor::Sensor *sensor)
+    { this->export_energy_sensor_ = sensor; }
+  void set_import_power_sensor(sensor::Sensor *sensor)
+    { this->import_power_sensor_ = sensor; }
+  void set_export_power_sensor(sensor::Sensor *sensor)
+    { this->export_power_sensor_ = sensor; }
   void setup() override;
   void dump_config() override;
   void loop() override;
@@ -207,14 +214,18 @@ class ZivComponent : public PollingComponent, public FrameReceiver {
       IDLE,
       SEND_BUFFERS,
       SEND_AARQ,
-      READ_IMPORT,
-      READ_EXPORT,
+      READ_IMPORT_ENERGY,
+      READ_EXPORT_ENERGY,
+      READ_IMPORT_POWER,
+      READ_EXPORT_POWER,
   };
   void nextcomm(State state);
   void communicate();
 
-  sensor::Sensor *import_sensor_{nullptr};
-  sensor::Sensor *export_sensor_{nullptr};
+  sensor::Sensor *import_energy_sensor_{nullptr};
+  sensor::Sensor *export_energy_sensor_{nullptr};
+  sensor::Sensor *import_power_sensor_{nullptr};
+  sensor::Sensor *export_power_sensor_{nullptr};
   State state_{State::IDLE};
   State next_state_{State::IDLE};
   dlmsSettings settings_;
