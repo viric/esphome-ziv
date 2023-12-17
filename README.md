@@ -6,7 +6,7 @@ meter](https://www.zivautomation.com/products/metering-ami/prime-plc-smart-meter
 that my electricity company provided at home to have good measurement on import and export of electricity.
 
 The manual ([ZIV - Monofásico
-5CTM.pdf](https://foroelectricidad.com/download/file.php?id\x3d4711)) says that
+5CTM.pdf](https://foroelectricidad.com/download/file.php?id=4711)) says that
 its Optical port (Infrared) has these parameters:
 
 - Optical port: as norm UNE EN 62056-21
