@@ -35,7 +35,7 @@ Example use
 
 ```yaml
 external_components:
-  - source: github://viric/esphome-ziv
+  - source: github://viric/esphome-ziv@master
     components: [ ziv ]
 
 uart:
