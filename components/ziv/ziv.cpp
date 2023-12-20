@@ -81,125 +81,103 @@ void ZivComponent::nextcomm(State state)
           cosem_rr_.setLogicalName("1.0.2.7.0.255");
           rr_ = &cosem_rr_;
           break;
+      case State::IDLE:
+          rr_ = nullptr;
+          break;
       default:
-          ESP_LOGV(TAG, "nextcomm(IDLE) unexpected");
+          ESP_LOGE(TAG, "nextcomm(IDLE) unexpected");
           return;
   }
   resetcomm();
-  rr_->start(&messages_);
-  for(int i=0; i < messages_.size; ++i)
+  if (rr_ != nullptr)
   {
-      ESP_LOGV(TAG, "nextcomm: message %d size %d", i, messages_.data[i]->size);
+      rr_->start(&messages_);
+      for(int i=0; i < messages_.size; ++i)
+      {
+          ESP_LOGV(TAG, "nextcomm: message %d size %d", i, messages_.data[i]->size);
+      }
   }
   state_ = state;
 }
 
+const char* ZivComponent::state_name(State state)
+{
+  switch(state)
+  {
+    case State::IDLE:
+      return "IDLDE";
+    case State::SEND_BUFFERS:
+      return "SEND_BUFFERS";
+    case State::SEND_AARQ:
+      return "SEND_AARQ";
+    case State::READ_IMPORT_ENERGY:
+      return "READ_IMPORT_ENERGY";
+    case State::READ_EXPORT_ENERGY:
+      return "READ_EXPORT_ENERGY";
+    case State::READ_IMPORT_POWER:
+      return "READ_IMPORT_POWER";
+    case State::READ_EXPORT_POWER:
+      return "READ_EXPORT_POWER";
+  }
+  return "UNKNOWN";
+}
+
 void ZivComponent::loop() {
+  State next_state = State::IDLE;
+  sensor::Sensor* sensor = nullptr;;
+  float scale = 1.f;
+
   switch(state_)
   {
     case State::IDLE:
-        break;
+      break;
     case State::SEND_BUFFERS:
-        communicate();
-        if (rr_->result().has_value())
-        {
-            if (*rr_->result() == 0)
-            {
-                nextcomm(State::SEND_AARQ);
-            }
-            else
-            {
-                ESP_LOGE(TAG, "State::SEND_BUFFERS error");
-                state_ = State::IDLE;
-            }
-        }
-        break;
+      next_state = State::SEND_AARQ;
+      break;
     case State::SEND_AARQ:
-        communicate();
-        if (rr_->result().has_value())
-        {
-            if (*rr_->result() == 0)
-            {
-                nextcomm(State::READ_IMPORT_ENERGY);
-            }
-            else
-            {
-                ESP_LOGE(TAG, "State::SEND_AARQ error");
-                state_ = State::IDLE;
-            }
-        }
-        break;
+      next_state = State::READ_IMPORT_ENERGY;
+      break;
     case State::READ_IMPORT_ENERGY:
-        communicate();
-        if (rr_ == &cosem_rr_ && rr_->result().has_value())
-        {
-            if (*rr_->result() == 0)
-            {
-                if (import_energy_sensor_)
-                    import_energy_sensor_->publish_state(cosem_rr_.value());
-
-                nextcomm(State::READ_EXPORT_ENERGY);
-            }
-            else
-            {
-                ESP_LOGE(TAG, "State::SEND_AARQ error");
-                state_ = State::IDLE;
-            }
-        }
-        break;
+      sensor = import_energy_sensor_;
+      scale = 1.f; // Wh
+      next_state = State::READ_EXPORT_ENERGY;
+      break;
     case State::READ_EXPORT_ENERGY:
-        communicate();
-        if (rr_ == &cosem_rr_ && rr_->result().has_value())
-        {
-            if (*rr_->result() == 0)
-            {
-                if (export_energy_sensor_)
-                    export_energy_sensor_->publish_state(cosem_rr_.value());
-                nextcomm(State::READ_IMPORT_POWER);
-            }
-            else
-            {
-                ESP_LOGE(TAG, "State::SEND_AARQ error");
-                state_ = State::IDLE;
-            }
-        }
-        break;
+      sensor = export_energy_sensor_;
+      scale = 1.f; // Wh
+      next_state = State::READ_IMPORT_POWER;
+      break;
     case State::READ_IMPORT_POWER:
-        communicate();
-        if (rr_ == &cosem_rr_ && rr_->result().has_value())
-        {
-            if (*rr_->result() == 0)
-            {
-                /* power is in decawatts */
-                if (import_power_sensor_)
-                    import_power_sensor_->publish_state(cosem_rr_.value() * 10);
-
-                nextcomm(State::READ_EXPORT_POWER);
-            }
-            else
-            {
-                ESP_LOGE(TAG, "State::SEND_AARQ error");
-                state_ = State::IDLE;
-            }
-        }
-        break;
+      sensor = import_power_sensor_;
+      scale = 10.f; // decawatts
+      next_state = State::READ_EXPORT_POWER;
+      break;
     case State::READ_EXPORT_POWER:
-        communicate();
-        if (rr_ == &cosem_rr_ && rr_->result().has_value())
-        {
-            if (*rr_->result() == 0)
-            {
-                /* power is in decawatts */
-                if (export_power_sensor_)
-                    export_power_sensor_->publish_state(cosem_rr_.value() * 10);
-            }
-            else
-            {
-                ESP_LOGE(TAG, "State::SEND_AARQ error");
-            }
-            state_ = State::IDLE;
-        }
-        break;
+      sensor = export_power_sensor_;
+      scale = 10.f; // decawatts
+      next_state = State::IDLE;
+      break;
+  }
+
+  if (state_ == State::IDLE)
+    return;
+
+  communicate();
+  if (rr_->result().has_value())
+  {
+    if (*rr_->result() == 0)
+    {
+      if (sensor != nullptr)
+      {
+        sensor->publish_state(cosem_rr_.value() * scale);
+      }
+      nextcomm(next_state);
+    }
+    else
+    {
+      ESP_LOGE(TAG, "Error in state %s", state_name(state_));
+      state_ = State::IDLE;
+    }
   }
 }
 

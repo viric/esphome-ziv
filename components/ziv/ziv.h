@@ -221,6 +221,7 @@ class ZivComponent : public PollingComponent, public FrameReceiver {
   };
   void nextcomm(State state);
   void communicate();
+  static const char* state_name(State state);
 
   sensor::Sensor *import_energy_sensor_{nullptr};
   sensor::Sensor *export_energy_sensor_{nullptr};
