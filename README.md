@@ -73,4 +73,27 @@ sure.
 
 For example, maybe it can be made to work with meters that use _IEC 62056-21 mode E_,
 currently not supported by [this Aquaticus esphome
-module](https://aquaticus.info/iec62056.html).
+module](https://aquaticus.info/iec62056.html). It should be easy to change the
+initialisation parameters in [src](https://github.com/viric/esphome-ziv/blob/master/components/ziv/ziv.cpp#L37);
+
+LICENCE
+-------------
+
+```
+    esphome-ziv: esphome module for Ziv 5CTM electricity meters
+    Copyright (C) 2023  Lluís Batlle i Rossell
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+```
