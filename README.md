@@ -11,7 +11,6 @@ its Optical port (Infrared) has these parameters:
 
 - Optical port: as norm UNE EN 62056-21
 - Signals: RX/TX
-- Implemented protocol: RX/TX
 - Speed: 9600 baud
 - ... trough the communication ports ... with the protocol DLMS/COSEM
 
@@ -63,3 +62,15 @@ sensor:
     export_active_power:
       name: "Export active power"
 ```
+
+Any other DLMS/HDLC/COSEM
+--------------
+
+The code can be probably made to accomodate any other DLMS/HDLC/COSEM
+electricity meter, by changing the connection parameters currently hardcoded.
+But I don't have evidence of any other meter working like this, so I can't be
+sure.
+
+For example, maybe it can be made to work with meters that use _IEC 62056-21 mode E_,
+currently not supported by [this Aquaticus esphome
+module](https://aquaticus.info/iec62056.html).
