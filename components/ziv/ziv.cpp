@@ -239,6 +239,8 @@ void ZivComponent::communicate()
                     rbuffer_.size += navailable;
                 } while(available() > 0);
 
+                /* This >5 is copied from Gurux Arduino Client example code.
+                 * No idea why. */
                 if (rbuffer_.size > 5)
                 {
                     for(int i = rbuffer_.size-1; i != lastReadPos; --i)
